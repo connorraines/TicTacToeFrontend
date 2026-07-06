@@ -1,36 +1,14 @@
 import { useEffect, useState } from "react";
-import Board, { calculateWinner } from "./Board";
+import Board from "./Board";
 
 export default function Game() {
   const [xIsNext, setXIsNext] = useState(true);
   const [history, setHistory] = useState([Array(9).fill(null)]);
   const [currentMove, setCurrentMove] = useState(0);
   const currentSquares = history[currentMove];
-  const [newBoard, setBoard] = useState([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  // useEffect(() => {
-  //     async function getMove(){
-  //       try{
-  //         setLoading(true)
-  //         const response = await fetch("http://localhost:8000/move", {
-  //           method: "POST",
-  //           body: JSON.stringify(nextSquares),
-  //           headers: {
-  //             "Content-Type": "application/json",
-  //           }
-  //         })
-  //         const responseData = await response.json()
-  //         setLoading(false)
-  //         setBoard(responseData)
-  //       } catch(error) {
-  //         setError(error.message)
-  //         console.log(error)
-  //       }
-      
-  //     }
-  //     getMove()
-  //  }, [])
+  const [error, setError] = useState<string | null>(null)
+  
   useEffect(() => {
     if (history.length === 1){
       return;
@@ -67,14 +45,18 @@ export default function Game() {
           setLoading(false)
           //setBoard(responseData)
           handlePlay(responseData.flat())
-        } catch(error) {
-          setError(error.message)
+        } catch (error: unknown) {
+          if (error instanceof Error) {
+            setError(error.message)
+          } else {
+            setError("An unknown error occurred")
+          }
           console.log(error)
         }
       
       }
       getMove()
-      console.log(newBoard)
+
   }, [history])
   function handlePlay(nextSquares: string[]) {
     const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
@@ -86,7 +68,7 @@ export default function Game() {
     setCurrentMove(nextMove);
     setXIsNext(nextMove % 2 === 0);
   }
-  const moves = history.map((squares, move) => {
+  const moves = history.map((_, move) => {
     let description;
     if (move > 0) {
       description = "Go to move #" + move;
@@ -105,6 +87,7 @@ export default function Game() {
       <div>
         <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} />
         <header>{loading}</header>
+        {error ? <p role="alert" className="mt-2 text-red-600">{error}</p> : null}
       </div>
       <div>
         <ol className="space-y-2">{moves}</ol>
