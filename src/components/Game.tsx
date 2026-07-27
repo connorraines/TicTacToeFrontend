@@ -16,6 +16,10 @@ export default function Game() {
     if (xIsNext){
       return;
     }
+    if (history.length === 10){
+      setXIsNext(true);
+      return;
+    }
     console.log(history)
       async function getMove(){
         try{
@@ -70,7 +74,9 @@ export default function Game() {
   }
   const moves = history.map((_, move) => {
     let description;
-    if (move > 0) {
+    if (move % 2 != 0) {
+      return;
+    } else if (move > 0) {
       description = "Go to move #" + move;
     } else {
       description = "Go to game start";
